@@ -15,28 +15,27 @@ import java.util.Arrays;
 
 public class StateMachine <B extends Robot, T extends State> {
 
-    private Class<T> stateClass;
-    private State state = new State(this, "");
+    private T state = (T)new State(this);
     public final B bot;
 
     public StateMachine(B bot) {
         this.bot = bot;
     }
 
-    public Command setState(State newState) {
+    public Command setState(T newState) {
         return new SequentialCommandGroup(
                     state.finish(),
                     newState.initialize(state),
-                    new InstantCommand(() -> state = newState)
+                    new InstantCommand(() -> {
+                        state.setActive(false);
+                        newState.setActive(true);
+                        state = newState;
+                    })
             );
     }
 
-    public StateMachineCommand set(State newState) {
-        return new StateMachineCommand(this, newState);
-    }
-
-    public T createState() {
-        return stateClass.cast(new State(this, ""));
+    public StateMachineCommand<T> set(T newState) {
+        return new StateMachineCommand<>(this, newState);
     }
 
     public void run() {

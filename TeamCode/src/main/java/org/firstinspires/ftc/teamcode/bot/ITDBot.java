@@ -21,7 +21,7 @@ public class ITDBot extends Robot {
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
 
         arm = new PivotSlide(hardwareMap, "pivot", "extension");
-        intake = new Intake(hardwareMap, "intake");
+        intake = new Intake(hardwareMap, "intake", "dropdown");
 
         register(arm, drive, intake);
     }

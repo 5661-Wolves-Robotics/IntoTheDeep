@@ -17,20 +17,18 @@ import java.util.function.DoubleSupplier;
 public class PivotSlide extends SubsystemBase {
 
     private final DcMotorEx m_pivot, m_extension;
-    private final double offset = 0.1;
+    private final double offset = 15.0;
 
     private final int MAX_EXTENSION = 3500;
     public double extensionTarget = 0;
 
-    public double pp = 0.04, pi = 0.002, pd = 0.005, pf = 0.01;
-    public double pivotTarget = 5;
+    public double pp = 0.045, pi = 0.001, pd = 0.0008, pf = 0.015;
+    public double pivotTarget = 0;
     private final PIDController pivotController = new PIDController(pp, pi, pd);
 
     public PivotSlide(HardwareMap hm, String pivot, String extension) {
         m_pivot = hm.get(DcMotorEx.class, pivot);
         m_extension = hm.get(DcMotorEx.class, extension);
-
-        m_pivot.setDirection(DcMotorSimple.Direction.REVERSE);
 
         m_extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

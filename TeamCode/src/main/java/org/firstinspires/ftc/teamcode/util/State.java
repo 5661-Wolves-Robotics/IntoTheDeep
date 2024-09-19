@@ -8,11 +8,10 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 public class State {
 
     protected StateMachine<?, ?> machine;
-    private final String stateName;
+    private boolean active;
 
-    public State(StateMachine<?, ?> machine, String name) {
+    public State(StateMachine<?, ?> machine) {
         this.machine = machine;
-        stateName = name;
     }
 
     public Command initialize(State from){return new InstantCommand();}
@@ -20,6 +19,10 @@ public class State {
     public Command finish(){return new InstantCommand();}
 
     public String getName() {
-        return stateName;
+        return this.getClass().getSimpleName();
     }
+
+    public boolean isActive() {return active; }
+
+    protected void setActive(boolean active) {this.active = active;}
 }

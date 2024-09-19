@@ -17,12 +17,12 @@ public class ServoTester extends LinearOpMode {
     public void runOpMode() {
         driver = new GamepadEx(gamepad1);
 
-        Servo servoL = hardwareMap.get(Servo.class, "diffL");
-        Servo servoR = hardwareMap.get(Servo.class, "diffR");
+        Servo intake = hardwareMap.get(Servo.class, "intake");
+        Servo dropdown = hardwareMap.get(Servo.class, "dropdown");
 
-        servoL.setDirection(Servo.Direction.REVERSE);
-        servoL.setPosition(1);
-        servoR.setPosition(1);
+        dropdown.setDirection(Servo.Direction.REVERSE);
+        intake.setPosition(1);
+        dropdown.setPosition(0);
 
         driver.getGamepadButton(GamepadKeys.Button.A)
                         .whenPressed(() -> lowered = !lowered);
@@ -31,11 +31,11 @@ public class ServoTester extends LinearOpMode {
 
         while(opModeIsActive() && !isStopRequested()) {
             if(lowered) {
-                servoL.setPosition((driver.getRightX() + 1) / 2.0 - 0.03);
-                servoR.setPosition((-driver.getRightX() + 1) / 2.0 - 0.03);
+                dropdown.setPosition(0.6);
+                intake.setPosition(1);
             } else {
-                servoL.setPosition(1);
-                servoR.setPosition(1);
+                dropdown.setPosition(0);
+                intake.setPosition(0.5);
             }
             CommandScheduler.getInstance().run();
         }

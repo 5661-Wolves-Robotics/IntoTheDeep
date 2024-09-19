@@ -5,12 +5,12 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.util.State;
 import org.firstinspires.ftc.teamcode.util.StateMachine;
 
-public class StateMachineCommand extends CommandBase{
+public class StateMachineCommand <T extends State> extends CommandBase{
 
-    private final StateMachine<?, ?> machine;
-    private final State state;
+    private final StateMachine<?, T> machine;
+    private final T state;
 
-    public StateMachineCommand(StateMachine<?, ?> machine, State state) {
+    public StateMachineCommand(StateMachine<?, T> machine, T state) {
         this.machine = machine;
         this.state = state;
     }

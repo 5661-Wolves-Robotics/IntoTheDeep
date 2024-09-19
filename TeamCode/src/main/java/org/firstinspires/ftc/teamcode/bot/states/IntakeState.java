@@ -10,14 +10,17 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.bot.ITDBot;
 import org.firstinspires.ftc.teamcode.bot.commands.ExtendTo;
 import org.firstinspires.ftc.teamcode.bot.commands.PivotTo;
+import org.firstinspires.ftc.teamcode.bot.commands.SetIntakePos;
 import org.firstinspires.ftc.teamcode.bot.commands.SinusoidalRaise;
+import org.firstinspires.ftc.teamcode.bot.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.util.DualInputStateMachine;
 import org.firstinspires.ftc.teamcode.util.State;
 import org.firstinspires.ftc.teamcode.util.StateMachine;
 
 public class IntakeState extends BaseState {
 
-    public IntakeState(StateMachine<ITDBot, BaseState> machine, String name) {
-        super(machine, name);
+    public IntakeState(DualInputStateMachine<ITDBot, BaseState> machine) {
+        super(machine);
     }
 
     @Override
@@ -28,16 +31,18 @@ public class IntakeState extends BaseState {
             case "DepositState":
                 return new SequentialCommandGroup(
                         new ExtendTo(arm, 0.3),
-                        new PivotTo(arm, 20),
+                        new PivotTo(arm, 90),
                         new ParallelCommandGroup(
-                                new ExtendTo(arm, 0.5),
-                                new PivotTo(arm, 5)
+                                new ExtendTo(arm, 0.1),
+                                new PivotTo(arm, 180),
+                                new SetIntakePos(intake, Intake.INTAKING)
                         )
                 );
             case "BaseState":
                 return new ParallelCommandGroup(
-                        new SinusoidalRaise(arm, 1000, 20, 5),
-                        new ExtendTo(arm, 0.5)
+                        new ExtendTo(arm, 0.1),
+                        new PivotTo(arm, 180),
+                        new SetIntakePos(intake, Intake.INTAKING)
                 );
             default:
                 return new InstantCommand();
