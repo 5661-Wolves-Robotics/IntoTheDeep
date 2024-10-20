@@ -7,25 +7,40 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Intake extends SubsystemBase {
 
-    private final Servo m_servo;
+    private final Servo m_yawServo;
     private final Servo m_dropdownServo;
-    public static final double INTAKING = 0.4;
-    public static final double STORED = 0.0;
-    public static final double DEPOSITING = 0.7;
+    private final Servo m_leftServo;
+    private final Servo m_rightServo;
 
-    public Intake(HardwareMap hardwareMap, String servoName, String dropdownServoName){
-        m_servo = hardwareMap.get(Servo.class, servoName);
+    public boolean dropped = true;
+
+    public Intake(HardwareMap hardwareMap, String yawServoName, String dropdownServoName, String leftServoName, String rightServoName){
+        m_yawServo = hardwareMap.get(Servo.class, yawServoName);
         m_dropdownServo = hardwareMap.get(Servo.class, dropdownServoName);
+        m_leftServo = hardwareMap.get(Servo.class, leftServoName);
+        m_rightServo = hardwareMap.get(Servo.class, rightServoName);
 
-        m_servo.setDirection(Servo.Direction.REVERSE);
+        m_dropdownServo.setDirection(Servo.Direction.REVERSE);
+        m_yawServo.setDirection(Servo.Direction.REVERSE);
+        m_rightServo.setDirection(Servo.Direction.REVERSE);
+    }
+
+    public void setYaw(double pos) {
+        m_yawServo.setPosition(pos);
+    }
+
+    public void setDropdown(boolean pos) {
+        dropped = pos;
+        setDropdownPosition();
+    }
+
+    public void setDropdownPosition() {
+        m_dropdownServo.setPosition(dropped ? 0.6 : 0);
     }
 
     public void setPower(double power) {
-        m_servo.setPosition(power);
-    }
-
-    public void setPos(double pos) {
-        m_dropdownServo.setPosition(pos);
+        m_rightServo.setPosition(power);
+        m_leftServo.setPosition(power);
     }
 
 }

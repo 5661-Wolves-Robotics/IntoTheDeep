@@ -5,26 +5,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
 
-public class ExtendTo extends CommandBase {
+public class RetractSlideToZero extends CommandBase {
 
     private final PivotSlide arm;
-    private final double target;
 
-    public ExtendTo(PivotSlide arm, double target){
+    public RetractSlideToZero(PivotSlide arm){
         this.arm = arm;
-        this.target = target;
 
         addRequirements(arm);
     }
 
     @Override
     public void initialize() {
-        arm.setExtensionTarget(target);
+        arm.setExtensionTarget(-1.0);
     }
 
     @Override
     public boolean isFinished() {
-        double curr = arm.getExtensionWithOffset();
-        return curr <= target + PivotSlide.EXT_TOLERANCE && curr >= target - PivotSlide.EXT_TOLERANCE;
+        return arm.hasReachedLimit();
     }
 }

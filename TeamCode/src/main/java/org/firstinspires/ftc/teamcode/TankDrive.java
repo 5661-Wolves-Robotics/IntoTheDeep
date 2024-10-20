@@ -43,7 +43,6 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -157,7 +156,7 @@ public final class TankDrive {
         }
 
         @Override
-        public Twist2dDual<Time> update() {
+        public Twist2dDual<Time> updateLocalizer() {
             List<PositionVelocityPair> leftReadings = new ArrayList<>(), rightReadings = new ArrayList<>();
             double meanLeftPos = 0.0, meanLeftVel = 0.0;
             for (Encoder e : leftEncs) {
@@ -450,7 +449,7 @@ public final class TankDrive {
     }
 
     public PoseVelocity2d updatePoseEstimate() {
-        Twist2dDual<Time> twist = localizer.update();
+        Twist2dDual<Time> twist = localizer.updateLocalizer();
         pose = pose.plus(twist.value());
 
         poseHistory.add(pose);

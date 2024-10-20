@@ -46,6 +46,7 @@ import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
+import org.firstinspires.ftc.teamcode.util.GoBildaPinpointLocalizer;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -113,7 +114,7 @@ public final class MecanumDrive implements Subsystem {
 
     public final LazyImu lazyImu;
 
-    public final Localizer localizer;
+    public final GoBildaPinpointLocalizer localizer;
     public Pose2d pose;
 
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
@@ -144,7 +145,7 @@ public final class MecanumDrive implements Subsystem {
         }
 
         @Override
-        public Twist2dDual<Time> update() {
+        public Twist2dDual<Time> updateLocalizer() {
             PositionVelocityPair leftFrontPosVel = leftFront.getPositionAndVelocity();
             PositionVelocityPair leftBackPosVel = leftBack.getPositionAndVelocity();
             PositionVelocityPair rightBackPosVel = rightBack.getPositionAndVelocity();
@@ -229,8 +230,8 @@ public final class MecanumDrive implements Subsystem {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // TODO: reverse motor directions if needed
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
@@ -239,7 +240,11 @@ public final class MecanumDrive implements Subsystem {
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        localizer = new TwoDeadWheelLocalizer(hardwareMap, lazyImu.get(), PARAMS.inPerTick);
+        localizer = hardwareMap.get(GoBildaPinpointLocalizer.class, "localizer");
+        localizer.setOffsets(80.0, 165.1);
+        localizer.setEncoderResolution(GoBildaPinpointLocalizer.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        localizer.setEncoderDirections(GoBildaPinpointLocalizer.EncoderDirection.FORWARD, GoBildaPinpointLocalizer.EncoderDirection.REVERSED);
+        localizer.resetPosAndIMU();
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
@@ -443,8 +448,8 @@ public final class MecanumDrive implements Subsystem {
     }
 
     public PoseVelocity2d updatePoseEstimate() {
-        Twist2dDual<Time> twist = localizer.update();
-        pose = pose.plus(twist.value());
+        localizer.update();
+        pose = localizer.getPosition();
 
         poseHistory.add(pose);
         while (poseHistory.size() > 100) {
@@ -453,7 +458,7 @@ public final class MecanumDrive implements Subsystem {
 
         estimatedPoseWriter.write(new PoseMessage(pose));
 
-        return twist.velocity().value();
+        return localizer.getVelocity();
     }
 
     private void drawPoseHistory(Canvas c) {

@@ -50,7 +50,7 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
         FlightRecorder.write("THREE_DEAD_WHEEL_PARAMS", PARAMS);
     }
 
-    public Twist2dDual<Time> update() {
+    public Twist2dDual<Time> updateLocalizer() {
         PositionVelocityPair par0PosVel = par0.getPositionAndVelocity();
         PositionVelocityPair par1PosVel = par1.getPositionAndVelocity();
         PositionVelocityPair perpPosVel = perp.getPositionAndVelocity();

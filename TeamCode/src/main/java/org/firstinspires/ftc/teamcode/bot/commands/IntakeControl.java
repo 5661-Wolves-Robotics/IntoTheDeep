@@ -6,20 +6,23 @@ import org.firstinspires.ftc.teamcode.bot.subsystems.Intake;
 
 import java.util.function.DoubleSupplier;
 
-public class PowerIntake extends CommandBase {
+public class IntakeControl extends CommandBase {
 
     private final Intake intake;
-    private final DoubleSupplier power;
+    private final DoubleSupplier yaw;
+    private final DoubleSupplier speed;
 
-    public PowerIntake(Intake intake, DoubleSupplier power) {
+    public IntakeControl(Intake intake, DoubleSupplier yaw, DoubleSupplier speed) {
         this.intake = intake;
-        this.power = power;
+        this.yaw = yaw;
+        this.speed = speed;
 
         addRequirements(intake);
     }
 
     @Override
     public void execute() {
-        intake.setPower(power.getAsDouble());
+        intake.setYaw(yaw.getAsDouble());
+        intake.setPower(speed.getAsDouble());
     }
 }

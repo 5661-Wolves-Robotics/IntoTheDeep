@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 
+import java.util.function.BooleanSupplier;
+
 public class State {
 
     protected StateMachine<?, ?> machine;

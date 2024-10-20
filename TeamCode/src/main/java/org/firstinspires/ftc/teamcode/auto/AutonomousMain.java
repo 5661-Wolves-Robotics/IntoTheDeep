@@ -16,7 +16,7 @@ public class AutonomousMain extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        ITDBot bot = new ITDBot(hardwareMap);
+        ITDBot bot = new ITDBot(hardwareMap, telemetry);
 
         CommandScheduler.getInstance().registerSubsystem(bot.drive);
 

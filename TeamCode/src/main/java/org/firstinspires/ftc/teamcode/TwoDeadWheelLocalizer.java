@@ -60,7 +60,7 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         FlightRecorder.write("TWO_DEAD_WHEEL_PARAMS", PARAMS);
     }
 
-    public Twist2dDual<Time> update() {
+    public Twist2dDual<Time> updateLocalizer() {
         PositionVelocityPair parPosVel = par.getPositionAndVelocity();
         PositionVelocityPair perpPosVel = perp.getPositionAndVelocity();
 
