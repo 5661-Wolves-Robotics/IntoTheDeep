@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.bot.commands;
+package org.firstinspires.ftc.teamcode.bot.commands.pivotslide;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.util.Timing;

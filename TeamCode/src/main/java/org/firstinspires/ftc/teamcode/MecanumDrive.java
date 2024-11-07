@@ -31,6 +31,7 @@ import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.arcrobotics.ftclib.command.Subsystem;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -41,12 +42,15 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 import org.firstinspires.ftc.teamcode.util.GoBildaPinpointLocalizer;
+import org.firstinspires.ftc.teamcode.util.PinpointEncoder;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -65,32 +69,32 @@ public final class MecanumDrive implements Subsystem {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 0.00301177049079566059190509849719;
-        public double lateralInPerTick = 0.002310699499339184;
-        public double trackWidthTicks = 4425.681124842896;
+        public double inPerTick = 0.0020103308669551863744241239704;
+        public double lateralInPerTick = 0.0020103308669551863744241239704;//0.0015052645354559897;
+        public double trackWidthTicks = 450.24785165206373 * 11;
 
         // feedforward parameters (in tick units)
-        public double kS = 0.6511009736468392;
-        public double kV = 0.0005888590473016461;
-        public double kA = 0.00006;
+        public double kS = 1.0410354275675058;
+        public double kV = 0.00036701365863091735;
+        public double kA = 0.00007;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 50;
+        public double maxWheelVel = 70;
         public double minProfileAccel = -30;
         public double maxProfileAccel = 50;
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.PI; // shared with path
-        public double maxAngAccel = Math.PI;
+        public double maxAngVel = 2 * Math.PI; // shared with path
+        public double maxAngAccel = 2 * Math.PI;
 
         // path controller gains
-        public double axialGain = 0.0;
-        public double lateralGain = 0.0;
-        public double headingGain = 0.0; // shared with turn
+        public double axialGain = 7.0;
+        public double lateralGain = 4.0;
+        public double headingGain = 8.0; // shared with turn
 
-        public double axialVelGain = 0.0;
-        public double lateralVelGain = 0.0;
-        public double headingVelGain = 0.0; // shared with turn
+        public double axialVelGain = 0.1;
+        public double lateralVelGain = 0.1;
+        public double headingVelGain = 1.0; // shared with turn
     }
 
     public static Params PARAMS = new Params();
@@ -116,6 +120,9 @@ public final class MecanumDrive implements Subsystem {
 
     public final GoBildaPinpointLocalizer localizer;
     public Pose2d pose;
+    private PoseMap poseMap = pose -> new Pose2dDual<>(
+            pose.position.x, pose.position.y, pose.heading
+    );
 
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
 
@@ -241,12 +248,27 @@ public final class MecanumDrive implements Subsystem {
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         localizer = hardwareMap.get(GoBildaPinpointLocalizer.class, "localizer");
-        localizer.setOffsets(80.0, 165.1);
+        localizer.setOffsets(103.462, 84.357);
         localizer.setEncoderResolution(GoBildaPinpointLocalizer.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         localizer.setEncoderDirections(GoBildaPinpointLocalizer.EncoderDirection.FORWARD, GoBildaPinpointLocalizer.EncoderDirection.REVERSED);
+        localizer.recalibrateIMU();
         localizer.resetPosAndIMU();
+        localizer.setPosition(new Pose2D(DistanceUnit.INCH, pose.position.x, pose.position.y, AngleUnit.RADIANS, pose.heading.toDouble()));
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
+    }
+
+    @Override
+    public void periodic() {
+        updatePoseEstimate();
+    }
+
+    public void setPosition() {
+        localizer.setPosition(new Pose2D(DistanceUnit.INCH, pose.position.x, pose.position.y, AngleUnit.RADIANS, pose.heading.toDouble()));
+    }
+
+    public void setPoseMap(PoseMap poseMap) {
+        this.poseMap = poseMap;
     }
 
     public void setDrivePowers(PoseVelocity2d powers) {
@@ -295,7 +317,14 @@ public final class MecanumDrive implements Subsystem {
                 t = Actions.now() - beginTs;
             }
 
-            if (t >= timeTrajectory.duration) {
+            Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
+            targetPoseWriter.write(new PoseMessage(txWorldTarget.value()));
+
+            PoseVelocity2d robotVelRobot = updatePoseEstimate();
+
+            Pose2d error = txWorldTarget.value().minusExp(pose);
+
+            if (t >= timeTrajectory.duration && error.position.norm() < 2 && robotVelRobot.linearVel.norm() < 0.5 || t >= timeTrajectory.duration + 1) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);
@@ -303,11 +332,6 @@ public final class MecanumDrive implements Subsystem {
 
                 return false;
             }
-
-            Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
-            targetPoseWriter.write(new PoseMessage(txWorldTarget.value()));
-
-            PoseVelocity2d robotVelRobot = updatePoseEstimate();
 
             PoseVelocity2dDual<Time> command = new HolonomicController(
                     PARAMS.axialGain, PARAMS.lateralGain, PARAMS.headingGain,
@@ -338,7 +362,6 @@ public final class MecanumDrive implements Subsystem {
             p.put("y", pose.position.y);
             p.put("heading (deg)", Math.toDegrees(pose.heading.toDouble()));
 
-            Pose2d error = txWorldTarget.value().minusExp(pose);
             p.put("xError", error.position.x);
             p.put("yError", error.position.y);
             p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
@@ -490,7 +513,35 @@ public final class MecanumDrive implements Subsystem {
                 ),
                 beginPose, 0.0,
                 defaultTurnConstraints,
-                defaultVelConstraint, defaultAccelConstraint
+                defaultVelConstraint, defaultAccelConstraint,
+                poseMap
         );
     }
+
+    public RawEncoder getXEncoder() {
+        PinpointEncoder e = new PinpointEncoder(
+                localizer,
+                localizer::getEncoderX,
+                () -> ((localizer.getVelX() / 100.5309649159) * 2000),
+                DcMotorSimple.Direction.FORWARD,
+                leftBack.getController()
+        );
+
+        return new RawEncoder(e);
+    }
+
+
+    public RawEncoder getYEncoder() {
+        PinpointEncoder e = new PinpointEncoder(
+                localizer,
+                localizer::getEncoderY,
+                () -> ((localizer.getVelY() / 100.5309649159) * 2000),
+                DcMotorSimple.Direction.FORWARD,
+                leftBack.getController()
+        );
+
+        return new RawEncoder(e);
+    }
+
+    public GoBildaPinpointLocalizer getLocalizer() {return localizer;}
 }

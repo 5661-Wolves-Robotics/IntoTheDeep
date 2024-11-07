@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.bot.commands;
+package org.firstinspires.ftc.teamcode.bot.commands.pivotslide;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
 
@@ -22,6 +21,8 @@ public class RetractSlideToZero extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return arm.hasReachedLimit();
+        boolean finished = arm.hasSlideReachedLimit();
+        if(finished) arm.setExtensionTarget(0.1);
+        return arm.hasSlideReachedLimit();
     }
 }

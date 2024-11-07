@@ -27,10 +27,6 @@ public class StateMachine <B extends Robot, T extends State> {
 
     public Command setState(T newState) {
 
-        if(commandGroup.isScheduled()) {
-            commandGroup.cancel();
-        }
-
         commandGroup = new SequentialCommandGroup(
                     state.finish(),
                     newState.initialize(state),

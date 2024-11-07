@@ -2,20 +2,16 @@ package org.firstinspires.ftc.teamcode.bot.states;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.ProxyScheduleCommand;
+import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.bot.ITDBot;
-import org.firstinspires.ftc.teamcode.bot.commands.ExtendTo;
-import org.firstinspires.ftc.teamcode.bot.commands.ManualPivotSlideControl;
-import org.firstinspires.ftc.teamcode.bot.commands.PivotTo;
-import org.firstinspires.ftc.teamcode.bot.commands.RetractSlideToZero;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.ExtendTo;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.PivotTo;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.RetractSlideToZero;
+import org.firstinspires.ftc.teamcode.bot.commands.intake.SetIntakeDropdownPosition;
 import org.firstinspires.ftc.teamcode.util.DualInputStateMachine;
 import org.firstinspires.ftc.teamcode.util.State;
-
-import java.util.function.BooleanSupplier;
 
 public class DepositState extends BaseState{
 
@@ -29,9 +25,11 @@ public class DepositState extends BaseState{
         switch(from.getName()){
             case "BaseState":
                 return new SequentialCommandGroup(
-                            new RetractSlideToZero(arm),
-                            new PivotTo(arm, 93),
-                            new ExtendTo(arm, 0.99)
+                            new ScheduleCommand(new SetIntakeDropdownPosition(intake, 0.5).perpetually()),
+                            new RetractSlideToZero(arm).withTimeout(700),
+                            new PivotTo(arm, 90).withTimeout(1000),
+                            new ExtendTo(arm, 1.0).withTimeout(2000),
+                            new ScheduleCommand(new SetIntakeDropdownPosition(intake, 0.7).perpetually())
                     );
             default:
                 return new InstantCommand();

@@ -1,22 +1,20 @@
-package org.firstinspires.ftc.teamcode.bot.commands;
+package org.firstinspires.ftc.teamcode.bot.commands.intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.bot.subsystems.Intake;
 
-public class SetIntakeDropdown extends CommandBase {
+public class ToggleClaw extends CommandBase {
 
     private final Intake intake;
-    private final boolean dropped;
 
-    public SetIntakeDropdown(Intake intake, boolean dropped) {
+    public ToggleClaw(Intake intake) {
         this.intake = intake;
-        this.dropped = dropped;
     }
 
     @Override
     public void initialize() {
-        intake.setDropdown(dropped);
+        intake.setClawPos(!intake.getClawPos());
     }
 
     @Override

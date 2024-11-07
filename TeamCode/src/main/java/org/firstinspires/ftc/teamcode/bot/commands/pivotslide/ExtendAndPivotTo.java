@@ -1,11 +1,8 @@
-package org.firstinspires.ftc.teamcode.bot.commands;
+package org.firstinspires.ftc.teamcode.bot.commands.pivotslide;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.util.Timing;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
 import org.firstinspires.ftc.teamcode.util.motionprofiles.TrapezoidalMotionProfile;
 
@@ -45,8 +42,8 @@ public class ExtendAndPivotTo extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        double currExt = arm.getExtension();
-        double currAngle = arm.getAngle();
+        double currExt = arm.getExtensionWithOffset();
+        double currAngle = arm.getPivotAngle();
         return (currAngle <= angle + PivotSlide.PIVOT_TOLERANCE && currAngle >= angle - PivotSlide.PIVOT_TOLERANCE) && (currExt <= extension + PivotSlide.EXT_TOLERANCE && currExt >= extension - PivotSlide.EXT_TOLERANCE);
     }
 }
