@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.util;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
@@ -13,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import java.util.function.Supplier;
 
 public class PinpointEncoder implements DcMotorEx {
-
     private final Supplier<Integer> val;
     private final Supplier<Double> vel;
     private final Direction direction;
@@ -60,6 +60,12 @@ public class PinpointEncoder implements DcMotorEx {
 
     @Override
     public double getVelocity(AngleUnit unit) {
+        switch(unit) {
+            case DEGREES:
+                return (vel.get() / 2000.0) * 360.0;
+            case RADIANS:
+                return (vel.get() / 2000.0) * 2 * Math.PI;
+        }
         return 0;
     }
 
@@ -180,7 +186,6 @@ public class PinpointEncoder implements DcMotorEx {
 
     @Override
     public int getCurrentPosition() {
-        localizer.update();
         return val.get();
     }
 

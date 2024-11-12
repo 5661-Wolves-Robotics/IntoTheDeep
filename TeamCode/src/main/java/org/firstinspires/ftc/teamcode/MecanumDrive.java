@@ -69,14 +69,14 @@ public final class MecanumDrive implements Subsystem {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 0.0020103308669551863744241239704;
-        public double lateralInPerTick = 0.0020103308669551863744241239704;//0.0015052645354559897;
-        public double trackWidthTicks = 450.24785165206373 * 11;
+        public double inPerTick = 0.002;
+        public double lateralInPerTick = 0.002;
+        public double trackWidthTicks = 5559.017792322012;
 
         // feedforward parameters (in tick units)
         public double kS = 1.0410354275675058;
         public double kV = 0.00036701365863091735;
-        public double kA = 0.00007;
+        public double kA = 0.00006;
 
         // path profile parameters (in inches)
         public double maxWheelVel = 70;
@@ -251,8 +251,8 @@ public final class MecanumDrive implements Subsystem {
         localizer.setOffsets(103.462, 84.357);
         localizer.setEncoderResolution(GoBildaPinpointLocalizer.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         localizer.setEncoderDirections(GoBildaPinpointLocalizer.EncoderDirection.FORWARD, GoBildaPinpointLocalizer.EncoderDirection.REVERSED);
-        localizer.recalibrateIMU();
-        localizer.resetPosAndIMU();
+        //localizer.recalibrateIMU();
+        //localizer.resetPosAndIMU();
         localizer.setPosition(new Pose2D(DistanceUnit.INCH, pose.position.x, pose.position.y, AngleUnit.RADIANS, pose.heading.toDouble()));
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
@@ -521,10 +521,10 @@ public final class MecanumDrive implements Subsystem {
     public RawEncoder getXEncoder() {
         PinpointEncoder e = new PinpointEncoder(
                 localizer,
-                localizer::getEncoderX,
+                localizer::getEncoderY,
                 () -> ((localizer.getVelX() / 100.5309649159) * 2000),
                 DcMotorSimple.Direction.FORWARD,
-                leftBack.getController()
+                rightBack.getController()
         );
 
         return new RawEncoder(e);
@@ -534,7 +534,7 @@ public final class MecanumDrive implements Subsystem {
     public RawEncoder getYEncoder() {
         PinpointEncoder e = new PinpointEncoder(
                 localizer,
-                localizer::getEncoderY,
+                localizer::getEncoderX,
                 () -> ((localizer.getVelY() / 100.5309649159) * 2000),
                 DcMotorSimple.Direction.FORWARD,
                 leftBack.getController()

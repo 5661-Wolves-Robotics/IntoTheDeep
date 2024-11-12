@@ -11,8 +11,6 @@ import com.acmerobotics.roadrunner.TimeProfile
 import com.acmerobotics.roadrunner.Vector2d
 import com.acmerobotics.roadrunner.constantProfile
 import com.acmerobotics.roadrunner.ftc.DriveType
-import com.acmerobotics.roadrunner.ftc.DriveView
-import com.acmerobotics.roadrunner.ftc.DriveViewFactory
 import com.acmerobotics.roadrunner.ftc.Encoder
 import com.acmerobotics.roadrunner.ftc.FeedforwardFactory
 import com.acmerobotics.roadrunner.ftc.LazyImu
@@ -31,7 +29,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor
 import com.qualcomm.robotcore.util.SerialNumber
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.MecanumDrive
 import org.firstinspires.ftc.teamcode.util.GoBildaPinpointLocalizer
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -150,7 +147,6 @@ private fun recordEncoderData(e: Encoder, ts: Map<SerialNumber, Double>, ps: Mut
     vs.values.add(p.velocity.toDouble())
 }
 
-@TeleOp
 class PinpointForwardRamp(val dvf: PinpointDriveViewFactory) : LinearOpMode() {
     companion object {
         @JvmField
@@ -439,8 +435,6 @@ class PinpointMecanumMotorDirectionDebugger(val dvf: PinpointDriveViewFactory) :
     override fun runOpMode() {
         val view = dvf.make(hardwareMap)
 
-        view.updateLocalizer();
-
         require(view.type == DriveType.MECANUM) {
             "Only mecanum drives should run this op mode."
         }
@@ -458,6 +452,8 @@ class PinpointMecanumMotorDirectionDebugger(val dvf: PinpointDriveViewFactory) :
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
 
         while (opModeIsActive()) {
+
+            view.updateLocalizer();
             telemetry.addLine("Press each button to turn on its respective motor")
             telemetry.addLine()
             telemetry.addLine("<font face=\"monospace\">Xbox/PS4 Button - Motor</font>")
@@ -517,8 +513,6 @@ class PinpointDeadWheelDirectionDebugger(val dvf: PinpointDriveViewFactory) : Li
     override fun runOpMode() {
         val view = dvf.make(hardwareMap)
 
-        view.updateLocalizer();
-
         require(view.parEncs.isNotEmpty() && view.perpEncs.isNotEmpty()) {
             "Only run this op mode if you're using dead wheels."
         }
@@ -530,6 +524,9 @@ class PinpointDeadWheelDirectionDebugger(val dvf: PinpointDriveViewFactory) : Li
         if (isStopRequested) return
 
         while (opModeIsActive()) {
+
+            view.updateLocalizer();
+
             telemetry.addLine("Move each dead wheel individually and make sure the direction is correct")
             telemetry.addLine()
 
@@ -563,8 +560,6 @@ class PinpointAngularRampLogger(val dvf: PinpointDriveViewFactory) : LinearOpMod
         val view = dvf.make(hardwareMap)
         view.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL)
 
-        view.updateLocalizer();
-
         val data = object {
             val type = view.type
             val leftPowers = view.leftMotors.map { MutableSignal() }
@@ -585,6 +580,8 @@ class PinpointAngularRampLogger(val dvf: PinpointDriveViewFactory) : LinearOpMod
 
         val t = MidpointTimer()
         while (opModeIsActive()) {
+            view.updateLocalizer();
+
             for (i in view.leftMotors.indices) {
                 val power = -power(t.seconds())
                 view.leftMotors[i].power = power

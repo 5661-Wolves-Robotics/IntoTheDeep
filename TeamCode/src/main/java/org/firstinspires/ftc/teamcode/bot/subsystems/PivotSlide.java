@@ -28,16 +28,18 @@ public class PivotSlide extends SubsystemBase {
     public static double PIVOT_TOLERANCE = 3, EXT_TOLERANCE = 0.05;
 
 
-    public static double kp = 0.04, ki = 0.0005, kd = 0.002, kf = 0.05, kf_ex = 0.4;
-    public static double ex_kp = 0.04, ex_ki = 0.0005, ex_kd = 0.002;
+    public static double kp = 0.00, ki = 0.0000, kd = 0.000, kf = 0.05, kf_ex = 0.4;
+    public static double ex_kp = 0.00, ex_ki = 0.0000, ex_kd = 0.000;
     final double PITCH_GEAR_RATIO = 10.0 / 14.0;
     private final PIDController pivotController = new PIDController(kp, ki, kd),
                                 extensionController = new PIDController(ex_kp, ex_ki, ex_kd);
     private final double offset = -2.0;
     private double extOffset = 0.0;
 
-    public double pivotTarget = 0;
-    public double extensionTarget = 0.05;
+
+    //TODO: REMOVE STATIC!!
+    public static double pivotTarget = 0;
+    public static double extensionTarget = 0.05;
 
     public PivotSlide(HardwareMap hm, Telemetry telemetry) {
         pivot = hm.get(DcMotorEx.class, "pivot1");
@@ -113,7 +115,7 @@ public class PivotSlide extends SubsystemBase {
     }
 
     public double getExtension() {
-        return extension2.getCurrentPosition() / (double)MAX_EXTENSION;
+        return extensionEncoder.getPositionAndVelocity().position / (double)MAX_EXTENSION;
     }
 
     public double getExtensionWithOffset() {
@@ -132,9 +134,16 @@ public class PivotSlide extends SubsystemBase {
         pivotController.setPID(kp, ki, kd);
         double pivotPow =
                 pivotController.calculate(angle, pivotTarget) +
-                Math.cos(Math.toRadians(getPivotAngle())) * kf;
+                Math.cos(Math.toRadians(getPivotAngle())) * (
+                        kf + (getExtension() * kf_ex)
+                );
 
         setPivotPow(pivotPow);
+
+        extensionController.setPID(ex_kp, ex_ki, ex_kd);
+        double extensionPow = extensionController.calculate(getExtensionWithOffset(), extensionTarget);
+
+        setExtensionPow(extensionPow);
 
         if(hasSlideReachedLimit()) resetExtension();
     }
