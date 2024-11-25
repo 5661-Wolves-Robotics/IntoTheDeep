@@ -22,7 +22,10 @@ public class RetractSlideToZero extends CommandBase {
     @Override
     public boolean isFinished() {
         boolean finished = arm.hasSlideReachedLimit();
-        if(finished) arm.setExtensionTarget(0.1);
-        return arm.hasSlideReachedLimit();
+        if(finished){
+            arm.resetExtension();
+            arm.setExtensionTarget(0.02);
+        }
+        return finished;
     }
 }

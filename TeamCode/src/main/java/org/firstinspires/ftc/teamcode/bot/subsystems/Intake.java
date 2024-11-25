@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
         m_dropdownServo = hardwareMap.get(Servo.class, dropdownServoName);
         m_clawServo = hardwareMap.get(Servo.class, clawServoName);
 
-        m_yawServo.setDirection(Servo.Direction.REVERSE);
+        m_dropdownServo.setDirection(Servo.Direction.REVERSE);
     }
 
     public void setDropdown(double pos) {
@@ -28,14 +28,14 @@ public class Intake extends SubsystemBase {
     }
 
     public void setYaw(double pos) {
-        double DIFF = 1 - NEUTRAL_POS - 0.2;
+        double DIFF = 1 - NEUTRAL_POS;
         m_yawServo.setPosition(NEUTRAL_POS - (pos * DIFF));
         m_dropdownServo.setPosition(NEUTRAL_POS + (pos * DIFF));
     }
 
     public void setClawPos(boolean newPos) {
         closed = newPos;
-        m_clawServo.setPosition(newPos ? 0.43: 0.04);
+        m_clawServo.setPosition(newPos ? 0.46: 0.04);
     }
 
     public boolean getClawPos() {

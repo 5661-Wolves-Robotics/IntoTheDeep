@@ -31,7 +31,7 @@ public class ExtendTo extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        double curr = arm.getExtensionWithOffset();
+        double curr = arm.getExtension();
         return !continuous && (curr <= target + PivotSlide.EXT_TOLERANCE && curr >= target - PivotSlide.EXT_TOLERANCE);
     }
 }

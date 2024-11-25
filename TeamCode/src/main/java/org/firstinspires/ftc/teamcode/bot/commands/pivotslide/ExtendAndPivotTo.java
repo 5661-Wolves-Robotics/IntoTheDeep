@@ -13,10 +13,6 @@ public class ExtendAndPivotTo extends CommandBase {
     private final double angle, extension;
     private final PivotSlide arm;
 
-    private TrapezoidalMotionProfile motionProfile;
-    private Timing.Timer timer;
-    public static double pos = 0;
-
     public ExtendAndPivotTo(PivotSlide arm, double extension, double angle) {
         this.angle = angle;
         this.arm = arm;
@@ -27,23 +23,14 @@ public class ExtendAndPivotTo extends CommandBase {
 
     @Override
     public void initialize() {
-        motionProfile = arm.getMotionProfile(angle);
-        timer = new Timing.Timer(10000, TimeUnit.MILLISECONDS);
-        timer.start();
-
+        arm.setPivotAngle(angle);
         arm.setExtensionTarget(extension);
     }
 
     @Override
-    public void execute() {
-        arm.setPivotAngle(motionProfile.get(timer.elapsedTime() / 1000.0));
-        pos = motionProfile.get(timer.elapsedTime() / 1000.0);
-    }
-
-    @Override
     public boolean isFinished() {
-        double currExt = arm.getExtensionWithOffset();
-        double currAngle = arm.getPivotAngle();
+        double currExt = arm.getExtension();
+        double currAngle = arm.getEndpointAngle();
         return (currAngle <= angle + PivotSlide.PIVOT_TOLERANCE && currAngle >= angle - PivotSlide.PIVOT_TOLERANCE) && (currExt <= extension + PivotSlide.EXT_TOLERANCE && currExt >= extension - PivotSlide.EXT_TOLERANCE);
     }
 }

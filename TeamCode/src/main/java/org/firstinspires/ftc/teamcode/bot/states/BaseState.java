@@ -6,23 +6,26 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.bot.ITDBot;
 import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.ExtendTo;
-import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.HangSlide;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.MPPivotTo;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.ManualSlideControl;
 import org.firstinspires.ftc.teamcode.bot.commands.drive.LocalDrive;
-import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.ManualPivotSlideControl;
 import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.PivotTo;
 import org.firstinspires.ftc.teamcode.bot.commands.intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.bot.commands.hanghooks.SetHookAngle;
 import org.firstinspires.ftc.teamcode.bot.commands.intake.SetIntakeDropdownPosition;
 import org.firstinspires.ftc.teamcode.bot.commands.intake.ToggleClaw;
+import org.firstinspires.ftc.teamcode.bot.commands.pivotslide.RetractSlideToZero;
 import org.firstinspires.ftc.teamcode.bot.subsystems.HangingHooks;
 import org.firstinspires.ftc.teamcode.bot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
+import org.firstinspires.ftc.teamcode.teleop.TeleOpMain;
 import org.firstinspires.ftc.teamcode.util.DualInputStateMachine;
 import org.firstinspires.ftc.teamcode.util.State;
 
@@ -50,57 +53,62 @@ public class BaseState extends State {
     private IntakeControl powerIntake;
     private Command setIntakeDropdownPosition;
     private ToggleClaw clawToggle;
-    private ManualPivotSlideControl manualPivotSlideControl;
+    private ManualSlideControl manualPivotSlideControl;
     private SetHookAngle setHookAngle;
-    private HangSlide hangSlide;
 
     private final double PLACER_TURN_SPEED = 0.5;
-
-    private boolean canExtend = true;
 
     @Override
     public Command initialize(State from) {
 
-
+        TeleOpMain.DRIVER_TURN_SPEED = 1.0;
+        TeleOpMain.DRIVER_MOVE_SPEED = 1.0;
 
         switch(from.getName()) {
+            case "HangState":
+            case "SpecimenState":
+            case "LowDepositState":
             case "DepositState": //Coming from deposit state
                 return new SequentialCommandGroup(
-                        new InstantCommand(setIntakeDropdownPosition::cancel),
-                        new ExtendTo(arm, 0.05),
-                        new PivotTo(arm, 0).withTimeout(500),
-                        new ExtendTo(arm, 0.05),
-                        new InstantCommand(() -> canExtend = true),
-                        new ScheduleCommand(setIntakeDropdownPosition)
+                        new SetIntakeDropdownPosition(intake, 0.3),
+                        new WaitCommand(200),
+                        new ExtendTo(arm, 0.15).withTimeout(1000),
+                        new MPPivotTo(arm, 4.5).withTimeout(1200),
+                        new RetractSlideToZero(arm)
+                );
+            case "IntakeState":
+                return new SequentialCommandGroup(
+                        new ScheduleCommand(new SetIntakeDropdownPosition(intake, 0.8).perpetually()),
+                        new RetractSlideToZero(arm)
                 );
             case "BaseState":
                 return new InstantCommand();
             default: //Default initialization
-                localDrive = new LocalDrive(drive, driver::getLeftX, driver::getLeftY, () -> driver.getRightX() + ((placer.getButton(GamepadKeys.Button.DPAD_RIGHT) ? 1 : 0) - (placer.getButton(GamepadKeys.Button.DPAD_LEFT) ? 1 : 0)) * PLACER_TURN_SPEED);
+                localDrive = new LocalDrive(
+                        drive,
+                        () -> driver.getLeftX() * TeleOpMain.DRIVER_MOVE_SPEED,
+                        () -> driver.getLeftY() * TeleOpMain.DRIVER_MOVE_SPEED,
+                        () -> driver.getRightX() * TeleOpMain.DRIVER_TURN_SPEED + ((placer.getButton(GamepadKeys.Button.DPAD_RIGHT) ? 1 : 0) - (placer.getButton(GamepadKeys.Button.DPAD_LEFT) ? 1 : 0)) * PLACER_TURN_SPEED);
 
-                powerIntake = new IntakeControl(intake, () -> -placer.getLeftX());
+                powerIntake = new IntakeControl(intake, placer::getLeftX);
 
-                manualPivotSlideControl = new ManualPivotSlideControl(arm, ()->(
-                        placer.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - placer.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
-                ), ()->(
-                        -(placer.getButton(GamepadKeys.Button.DPAD_DOWN) ? 1 : 0) + (placer.getButton(GamepadKeys.Button.DPAD_UP) ? 1 : 0)
-                ));
-
-                setIntakeDropdownPosition = new SetIntakeDropdownPosition(intake, 0.7).perpetually();
+                setIntakeDropdownPosition = new SetIntakeDropdownPosition(intake, 0.8).perpetually();
                 clawToggle = new ToggleClaw(intake);
 
                 setHookAngle = new SetHookAngle(hooks, 200);
 
-                hangSlide = new HangSlide(arm, ()->(
+                manualPivotSlideControl = new ManualSlideControl(arm, ()->(
                         placer.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - placer.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
-                ), ()->(
-                        -(placer.getButton(GamepadKeys.Button.DPAD_DOWN) ? 1 : 0) + (placer.getButton(GamepadKeys.Button.DPAD_UP) ? 1 : 0)
-                ));
+                ), () -> -placer.getRightY());
 
-                return new SequentialCommandGroup(
+                return new ParallelCommandGroup(
                         new InstantCommand(() -> {
                             placer.getGamepadButton(GamepadKeys.Button.X)
-                                            .toggleWhenPressed(setIntakeDropdownPosition);
+                                            .toggleWhenPressed(new ConditionalCommand(
+                                                    setIntakeDropdownPosition,
+                                                    new InstantCommand(),
+                                                    () -> !machine.getState().getName().equals("DepositState")
+                                            ));
 
                             placer.getGamepadButton(GamepadKeys.Button.A)
                                             .whenPressed(clawToggle);
@@ -108,41 +116,13 @@ public class BaseState extends State {
                             placer.getGamepadButton(GamepadKeys.Button.Y)
                                             .toggleWhenPressed(setHookAngle);
 
-                            driver.getGamepadButton(GamepadKeys.Button.X)
-                                            .whenPressed(new ConditionalCommand(
-                                                    new ExtendTo(arm, 0.7),
-                                                    new InstantCommand(),
-                                                    ()->canExtend
-                                            ));
-
-                            placer.getGamepadButton(GamepadKeys.Button.B)
-                                    .whenPressed(new ConditionalCommand(
-                                            new ParallelCommandGroup(
-                                                    new ExtendTo(arm, 0.05),
-                                                    new ScheduleCommand(setIntakeDropdownPosition)
-                                            ),
-                                            new InstantCommand(),
-                                            ()->canExtend
-                                    ));
-
-                            driver.getGamepadButton(GamepadKeys.Button.Y)
-                                            .toggleWhenPressed(hangSlide);
-
                             drive.setDefaultCommand(localDrive);
                             intake.setDefaultCommand(powerIntake);
                             arm.setDefaultCommand(manualPivotSlideControl);
                             hooks.setDefaultCommand(new SetHookAngle(hooks, 0.0));
                         }),
-                        new ScheduleCommand(setIntakeDropdownPosition)
+                        new RetractSlideToZero(arm)
                 );
-
         }
-    }
-
-    @Override
-    public Command finish() {
-        return new InstantCommand(() -> {
-            canExtend = false;
-        });
     }
 }

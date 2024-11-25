@@ -25,7 +25,7 @@ public class ServoTester extends LinearOpMode {
         Servo dropdown = hardwareMap.get(Servo.class, "dropdown");
         Servo claw = hardwareMap.get(Servo.class, "claw");
 
-        yaw.setDirection(Servo.Direction.REVERSE);
+        dropdown.setDirection(Servo.Direction.REVERSE);
 
         waitForStart();
 

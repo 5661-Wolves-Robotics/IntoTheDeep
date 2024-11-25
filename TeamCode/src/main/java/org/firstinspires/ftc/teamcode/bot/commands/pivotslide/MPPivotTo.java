@@ -6,14 +6,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
 import org.firstinspires.ftc.teamcode.util.motionprofiles.TrapezoidalMotionProfile;
 
-public class PivotTo extends CommandBase {
+public class MPPivotTo extends CommandBase {
 
     private final double angle;
     private final PivotSlide arm;
     private TrapezoidalMotionProfile motionProfile;
     private ElapsedTime time;
 
-    public PivotTo(PivotSlide arm, double angle) {
+    public MPPivotTo(PivotSlide arm, double angle) {
         this.angle = angle;
         this.arm = arm;
         time = new ElapsedTime();
@@ -23,7 +23,13 @@ public class PivotTo extends CommandBase {
 
     @Override
     public void initialize() {
-        arm.setPivotAngle(angle);
+        time.reset();
+        motionProfile = arm.getMotionProfile(angle);
+    }
+
+    @Override
+    public void execute() {
+        arm.setPivotAngle(motionProfile.get(time.seconds()));
     }
 
     @Override

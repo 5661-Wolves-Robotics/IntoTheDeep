@@ -69,9 +69,9 @@ public final class MecanumDrive implements Subsystem {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 0.002;
-        public double lateralInPerTick = 0.002;
-        public double trackWidthTicks = 5559.017792322012;
+        public double inPerTick = 0.001978956;
+        public double lateralInPerTick = 0.001978956;
+        public double trackWidthTicks = 6821.7787560713830929035309526841;
 
         // feedforward parameters (in tick units)
         public double kS = 1.0410354275675058;
@@ -88,9 +88,9 @@ public final class MecanumDrive implements Subsystem {
         public double maxAngAccel = 2 * Math.PI;
 
         // path controller gains
-        public double axialGain = 7.0;
+        public double axialGain = 7.5;
         public double lateralGain = 4.0;
-        public double headingGain = 8.0; // shared with turn
+        public double headingGain = 8.5; // shared with turn
 
         public double axialVelGain = 0.1;
         public double lateralVelGain = 0.1;
@@ -324,7 +324,7 @@ public final class MecanumDrive implements Subsystem {
 
             Pose2d error = txWorldTarget.value().minusExp(pose);
 
-            if (t >= timeTrajectory.duration && error.position.norm() < 2 && robotVelRobot.linearVel.norm() < 0.5 || t >= timeTrajectory.duration + 1) {
+            if (t >= timeTrajectory.duration && error.position.norm() < 2) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);
