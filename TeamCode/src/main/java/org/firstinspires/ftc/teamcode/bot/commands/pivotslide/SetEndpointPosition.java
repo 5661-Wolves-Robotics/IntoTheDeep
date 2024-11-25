@@ -36,7 +36,7 @@ public class SetEndpointPosition extends CommandBase {
     }
 
     public boolean done() {
-        double curr = arm.getExtensionWithOffset();
+        double curr = arm.getExtension();
         double target = arm.getExtensionTarget();
 
         return Math.abs(target - curr) < 0.015;

@@ -81,7 +81,7 @@ public class TeleOpMain extends LinearOpMode {
             telemetry.addData("angle", bot.arm.getPivotAngle());
             telemetry.addData("voltage", bot.arm.getPivotEncoderVoltage());
             telemetry.addData("target", bot.arm.getPivotTarget());
-            telemetry.addData("extension", bot.arm.getExtensionWithOffset());
+            telemetry.addData("extension", bot.arm.getExtension());
             telemetry.addData("reached", bot.arm.hasSlideReachedLimit());
             telemetry.update();
 

@@ -251,8 +251,8 @@ public final class MecanumDrive implements Subsystem {
         localizer.setOffsets(103.462, 84.357);
         localizer.setEncoderResolution(GoBildaPinpointLocalizer.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         localizer.setEncoderDirections(GoBildaPinpointLocalizer.EncoderDirection.FORWARD, GoBildaPinpointLocalizer.EncoderDirection.REVERSED);
-        //localizer.recalibrateIMU();
-        //localizer.resetPosAndIMU();
+        localizer.recalibrateIMU();
+        localizer.resetPosAndIMU();
         localizer.setPosition(new Pose2D(DistanceUnit.INCH, pose.position.x, pose.position.y, AngleUnit.RADIANS, pose.heading.toDouble()));
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
