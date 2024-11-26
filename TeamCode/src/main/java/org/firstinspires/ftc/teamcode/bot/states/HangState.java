@@ -22,7 +22,7 @@ public class HangState extends BaseState{
 
     double extension = 0.5;
     boolean canExtend = true;
-    public HangState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public HangState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
     }
 

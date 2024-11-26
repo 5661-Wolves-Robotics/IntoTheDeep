@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.State;
 
 public class DepositState extends BaseState{
 
-    public DepositState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public DepositState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
     }
 

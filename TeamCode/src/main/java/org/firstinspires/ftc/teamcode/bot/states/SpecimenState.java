@@ -20,11 +20,10 @@ import org.firstinspires.ftc.teamcode.util.State;
 
 public class SpecimenState extends BaseState{
 
-
     double extension = 0.5;
     boolean canExtend = true;
 
-    public SpecimenState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public SpecimenState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
     }
 

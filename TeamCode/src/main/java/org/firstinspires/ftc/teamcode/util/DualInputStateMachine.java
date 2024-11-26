@@ -6,7 +6,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class DualInputStateMachine <T extends Robot, B extends State> extends StateMachine<T, B>{
+public class DualInputStateMachine <T extends Robot> extends StateMachine<T>{
 
     public final GamepadEx driver1;
     public final GamepadEx driver2;

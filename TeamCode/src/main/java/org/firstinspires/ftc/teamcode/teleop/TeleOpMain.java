@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.bot.states.IntakeState;
 import org.firstinspires.ftc.teamcode.bot.states.LowDepositState;
 import org.firstinspires.ftc.teamcode.bot.states.SpecimenState;
 import org.firstinspires.ftc.teamcode.util.DualInputStateMachine;
+import org.firstinspires.ftc.teamcode.util.State;
 
 @TeleOp
 public class TeleOpMain extends LinearOpMode {
@@ -28,7 +29,7 @@ public class TeleOpMain extends LinearOpMode {
     GamepadEx driver, placer;
     ITDBot bot;
 
-    DualInputStateMachine<ITDBot, BaseState> stateMachine;
+    DualInputStateMachine<ITDBot> stateMachine;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -41,33 +42,32 @@ public class TeleOpMain extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         bot     = new ITDBot(hardwareMap, telemetry, new Pose2d(-72, 12, 0));
-
         driver  = new GamepadEx(gamepad1);
         placer  = new GamepadEx(gamepad2);
 
-        stateMachine    = new DualInputStateMachine<>(bot, driver, placer, telemetry);
-        BaseState baseState             = new BaseState(stateMachine);
-        DepositState depositState       = new DepositState(stateMachine);
-        LowDepositState lowDepositState = new LowDepositState(stateMachine);
-        IntakeState intakeState         = new IntakeState(stateMachine);
-        HangState hangState             = new HangState(stateMachine);
-        SpecimenState specimenState     = new SpecimenState(stateMachine);
-        stateMachine.set(baseState).schedule();
+        stateMachine            = new DualInputStateMachine<>(bot, driver, placer, telemetry);
+        State baseState         = new BaseState(stateMachine);
+        State depositState      = new DepositState(stateMachine);
+        State lowDepositState   = new LowDepositState(stateMachine);
+        State intakeState       = new IntakeState(stateMachine);
+        State hangState         = new HangState(stateMachine);
+        State specimenState     = new SpecimenState(stateMachine);
+        stateMachine.setState(baseState).schedule();
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenPressed(stateMachine.set(depositState));
+                .whenPressed(stateMachine.setState(depositState));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenPressed(stateMachine.set(lowDepositState));
+                .whenPressed(stateMachine.setState(lowDepositState));
         placer.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(stateMachine.set(baseState));
+                .whenPressed(stateMachine.setState(baseState));
         driver.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(stateMachine.set(baseState));
+                .whenPressed(stateMachine.setState(baseState));
         driver.getGamepadButton(GamepadKeys.Button.X)
-                .whenPressed(stateMachine.set(intakeState));
+                .whenPressed(stateMachine.setState(intakeState));
         driver.getGamepadButton(GamepadKeys.Button.Y)
-                .whenPressed(stateMachine.set(hangState));
+                .whenPressed(stateMachine.setState(hangState));
         driver.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(stateMachine.set(specimenState));
+                .whenPressed(stateMachine.setState(specimenState));
 
         waitForStart();
 

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.util.State;
 
 public class IntakeState extends BaseState{
 
-    public IntakeState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public IntakeState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
     }
 

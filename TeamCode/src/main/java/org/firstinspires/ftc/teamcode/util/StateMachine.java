@@ -1,23 +1,13 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.command.CommandGroupBase;
-import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ProxyScheduleCommand;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.Subsystem;
 
-import org.firstinspires.ftc.teamcode.bot.commands.StateMachineCommand;
+public class StateMachine <B extends Robot> {
 
-import java.util.Arrays;
-
-public class StateMachine <B extends Robot, T extends State> {
-
-    private T state = (T)new State(this);
+    private State state = new State(this);
     public final B bot;
     private Command commandGroup = new InstantCommand();
 
@@ -25,7 +15,7 @@ public class StateMachine <B extends Robot, T extends State> {
         this.bot = bot;
     }
 
-    public Command setState(T newState) {
+    public Command setState(State newState) {
 
         commandGroup = new SequentialCommandGroup(
                     state.finish(),
@@ -38,10 +28,6 @@ public class StateMachine <B extends Robot, T extends State> {
             );
 
         return commandGroup;
-    }
-
-    public StateMachineCommand<T> set(T newState) {
-        return new StateMachineCommand<>(this, newState);
     }
 
     public void run() {

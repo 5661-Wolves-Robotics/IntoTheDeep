@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.State;
 
 public class LowDepositState extends BaseState{
 
-    public LowDepositState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public LowDepositState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
     }
 

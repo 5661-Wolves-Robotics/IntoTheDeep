@@ -38,7 +38,7 @@ public class BaseState extends State {
     protected final GamepadEx driver;
     protected final GamepadEx placer;
 
-    public BaseState(DualInputStateMachine<ITDBot, BaseState> machine) {
+    public BaseState(DualInputStateMachine<ITDBot> machine) {
         super(machine);
         ITDBot bot = machine.bot;
         intake = bot.intake;
