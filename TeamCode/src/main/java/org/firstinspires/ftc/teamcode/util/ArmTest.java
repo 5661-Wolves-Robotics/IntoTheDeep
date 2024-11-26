@@ -2,15 +2,9 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-import org.firstinspires.ftc.teamcode.bot.commands.IntakeControl;
-import org.firstinspires.ftc.teamcode.bot.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.bot.subsystems.PivotSlide;
 
 @TeleOp
 public class ArmTest extends LinearOpMode {

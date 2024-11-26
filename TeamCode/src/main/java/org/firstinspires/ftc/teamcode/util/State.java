@@ -9,10 +9,10 @@ import java.util.function.BooleanSupplier;
 
 public class State {
 
-    protected StateMachine<?, ?> machine;
+    protected StateMachine<?> machine;
     private boolean active;
 
-    public State(StateMachine<?, ?> machine) {
+    public State(StateMachine<?> machine) {
         this.machine = machine;
     }
 

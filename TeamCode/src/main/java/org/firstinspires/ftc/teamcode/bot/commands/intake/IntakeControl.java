@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.bot.commands;
+package org.firstinspires.ftc.teamcode.bot.commands.intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -10,12 +10,10 @@ public class IntakeControl extends CommandBase {
 
     private final Intake intake;
     private final DoubleSupplier yaw;
-    private final DoubleSupplier speed;
 
-    public IntakeControl(Intake intake, DoubleSupplier yaw, DoubleSupplier speed) {
+    public IntakeControl(Intake intake, DoubleSupplier yaw) {
         this.intake = intake;
         this.yaw = yaw;
-        this.speed = speed;
 
         addRequirements(intake);
     }
@@ -23,6 +21,5 @@ public class IntakeControl extends CommandBase {
     @Override
     public void execute() {
         intake.setYaw(yaw.getAsDouble());
-        intake.setPower(speed.getAsDouble());
     }
 }
